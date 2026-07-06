@@ -1,0 +1,57 @@
+# Plantilla de variables de ejemplo para la capa "foundation"
+#
+# Copie este archivo a "terraform.tfvars" (excluido de git via .gitignore) y
+# reemplace los valores placeholder por los valores reales de su entorno.
+# NUNCA versione "terraform.tfvars" ni ningun archivo con secretos reales.
+#
+# Alternativa sin .tfvars: las variables de autenticacion (client_id,
+# client_secret, tenant_id) tienen default = null en variables.tf, por lo que
+# pueden omitirse por completo de este archivo si se exportan como
+# variables de entorno ARM_* antes de ejecutar terraform:
+#   export ARM_CLIENT_ID="..."
+#   export ARM_CLIENT_SECRET="..."
+#   export ARM_TENANT_ID="..."
+# Cuando se usan estas env vars, no es necesario declarar la variable
+# equivalente en este archivo.
+#
+# Nota: subscription_id NO tiene este comportamiento (no tiene default en
+# variables.tf), por lo que siempre debe recibir un valor: ya sea en este
+# archivo, con -var, o mediante la variable de entorno TF_VAR_subscription_id.
+
+# Obligatoria. Identificador (UUID) de la suscripcion de Azure donde se
+# desplegara el laboratorio. Sin default: siempre debe proveerse un valor.
+subscription_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Opcional. Client ID (UUID / Application ID) del Service Principal usado
+# para autenticar el provider azurerm. Puede omitirse por completo (o
+# dejarse fuera de este archivo) si se define la variable de entorno
+# ARM_CLIENT_ID; en ese caso el provider la toma automaticamente.
+client_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Opcional / SENSIBLE. Client Secret del Service Principal. Puede omitirse
+# por completo (o dejarse fuera de este archivo) si se define la variable de
+# entorno ARM_CLIENT_SECRET. NUNCA escriba aqui un secreto real; este valor
+# es solo un placeholder de formato.
+client_secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# Opcional. Tenant ID (UUID) de Azure AD. Puede omitirse por completo (o
+# dejarse fuera de este archivo) si se define la variable de entorno
+# ARM_TENANT_ID.
+tenant_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Obligatoria. Nombre del grupo de recursos a crear en Azure. No tiene
+# default y debe declararse siempre (no existe env var ARM_* equivalente).
+resource_group_name = "rg-llm-lab-example"
+
+# Opcional. Region de Azure donde se creara el grupo de recursos. Tiene un
+# default seguro ("eastus2" en variables.tf); puede omitirse si el default
+# es adecuado para su despliegue.
+location = "eastus2"
+
+# Opcional. Etiquetas a aplicar al grupo de recursos. Tiene un default
+# seguro ({} en variables.tf); puede omitirse si no se requieren etiquetas.
+tags = {
+  environment = "lab"
+  project     = "llm-ollama-h100"
+  owner       = "xxxxxxxx"
+}
