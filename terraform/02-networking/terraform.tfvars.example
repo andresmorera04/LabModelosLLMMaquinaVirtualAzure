@@ -1,0 +1,107 @@
+# Plantilla de variables de ejemplo para la capa "networking"
+#
+# Copie este archivo a "terraform.tfvars" (excluido de git via .gitignore) y
+# reemplace los valores placeholder por los valores reales de su entorno.
+# NUNCA versione "terraform.tfvars" ni ningun archivo con secretos reales.
+#
+# Alternativa sin .tfvars: las variables de autenticacion (client_id,
+# client_secret, tenant_id) tienen default = null en variables.tf, por lo que
+# pueden omitirse por completo de este archivo si se exportan como
+# variables de entorno ARM_* antes de ejecutar terraform:
+#   export ARM_CLIENT_ID="..."
+#   export ARM_CLIENT_SECRET="..."
+#   export ARM_TENANT_ID="..."
+# Cuando se usan estas env vars, no es necesario declarar la variable
+# equivalente en este archivo.
+#
+# Nota: subscription_id NO tiene este comportamiento (no tiene default en
+# variables.tf), por lo que siempre debe recibir un valor: ya sea en este
+# archivo, con -var, o mediante la variable de entorno TF_VAR_subscription_id.
+
+# Obligatoria. Identificador (UUID) de la suscripcion de Azure donde se
+# desplegara el laboratorio. Sin default: siempre debe proveerse un valor.
+subscription_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Opcional. Client ID (UUID / Application ID) del Service Principal usado
+# para autenticar el provider azurerm. Puede omitirse por completo (o
+# dejarse fuera de este archivo) si se define la variable de entorno
+# ARM_CLIENT_ID; en ese caso el provider la toma automaticamente.
+client_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Opcional / SENSIBLE. Client Secret del Service Principal. Puede omitirse
+# por completo (o dejarse fuera de este archivo) si se define la variable de
+# entorno ARM_CLIENT_SECRET. NUNCA escriba aqui un secreto real; este valor
+# es solo un placeholder de formato.
+client_secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# Opcional. Tenant ID (UUID) de Azure AD. Puede omitirse por completo (o
+# dejarse fuera de este archivo) si se define la variable de entorno
+# ARM_TENANT_ID.
+tenant_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Obligatoria. Nombre del grupo de recursos creado por la capa "foundation"
+# (Ola 1). No tiene default: debe declararse siempre. Obtengalo de los
+# outputs de foundation ya aplicada, ejecutando desde este directorio:
+#   terraform -chdir=../01-foundation output -raw resource_group_name
+resource_group_name = "rg-llm-lab-example"
+
+# Opcional. Region de Azure de la capa foundation. Tiene un default seguro
+# ("eastus2" en variables.tf) que coincide con el default de foundation;
+# si su despliegue de foundation uso una region distinta, obtenga el valor
+# real ejecutando desde este directorio:
+#   terraform -chdir=../01-foundation output -raw location
+location = "eastus2"
+
+# Obligatoria. IP publica del desarrollador en formato CIDR /32, usada para
+# restringir el acceso entrante SSH (22) y a la API de Ollama (11434)
+# exclusivamente a este origen. No tiene default: debe declararse siempre.
+# Para obtener su IP publica actual, ejecute:
+#   curl -s https://api.ipify.org
+# y agregue el sufijo "/32" al resultado (ej. si el comando imprime
+# 203.0.113.5, el valor de esta variable debe ser "203.0.113.5/32").
+# El valor de abajo es un placeholder del rango de documentacion
+# TEST-NET-3 (RFC 5737); reemplacelo por su IP publica real.
+my_ip = "203.0.113.5/32"
+
+# Opcional. Nombre de la red virtual (VNet). Tiene un default seguro en
+# variables.tf; puede omitirse si el default es adecuado.
+vnet_name = "vm-ollama-h100-vnet"
+
+# Opcional. Nombre de la subred. Tiene un default seguro en variables.tf;
+# puede omitirse si el default es adecuado.
+subnet_name = "vm-ollama-h100-subnet"
+
+# Opcional. Nombre de la IP publica. Tiene un default seguro en
+# variables.tf; puede omitirse si el default es adecuado.
+public_ip_name = "vm-ollama-h100-pip"
+
+# Opcional. Nombre del grupo de seguridad de red (NSG). Tiene un default
+# seguro en variables.tf; puede omitirse si el default es adecuado.
+nsg_name = "vm-ollama-h100-nsg"
+
+# Opcional. Espacio de direcciones de la red virtual. Tiene un default
+# seguro ( ["10.0.0.0/16"] en variables.tf); puede omitirse si el default
+# es adecuado para su despliegue.
+vnet_address_space = ["10.0.0.0/16"]
+
+# Opcional. Prefijos de direcciones de la subred. Tiene un default seguro
+# ( ["10.0.1.0/24"] en variables.tf); puede omitirse si el default es
+# adecuado para su despliegue.
+subnet_address_prefixes = ["10.0.1.0/24"]
+
+# Opcional. Puerto SSH a permitir unicamente desde my_ip. Tiene un default
+# seguro (22 en variables.tf); puede omitirse si el default es adecuado.
+ssh_port = 22
+
+# Opcional. Puerto de la API de Ollama a permitir unicamente desde my_ip.
+# Tiene un default seguro (11434 en variables.tf); puede omitirse si el
+# default es adecuado.
+ollama_port = 11434
+
+# Opcional. Etiquetas a aplicar a los recursos de red. Tiene un default
+# seguro ({} en variables.tf); puede omitirse si no se requieren etiquetas.
+tags = {
+  environment = "lab"
+  project     = "llm-ollama-h100"
+  owner       = "xxxxxxxx"
+}
