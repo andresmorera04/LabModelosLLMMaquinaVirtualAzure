@@ -1,0 +1,166 @@
+# Plantilla de variables de ejemplo para la capa "compute"
+#
+# Copie este archivo a "terraform.tfvars" (excluido de git via .gitignore) y
+# reemplace los valores placeholder por los valores reales de su entorno.
+# NUNCA versione "terraform.tfvars" ni ningun archivo con secretos reales.
+#
+# Precondicion: la feature de suscripcion `UseStandardSecurityType` debe estar
+# registrada por la capa "foundation" (Ola 1) antes de aplicar esta capa, para
+# que la VM pueda crearse con tipo de seguridad Standard (sin Trusted Launch).
+# Esta capa no registra la feature ni la vuelve a declarar; solo depende de
+# que ya este activa en la suscripcion.
+#
+# Alternativa sin .tfvars: las variables de autenticacion (client_id,
+# client_secret, tenant_id) tienen default = null en variables.tf, por lo que
+# pueden omitirse por completo de este archivo si se exportan como
+# variables de entorno ARM_* antes de ejecutar terraform:
+#   export ARM_CLIENT_ID="..."
+#   export ARM_CLIENT_SECRET="..."
+#   export ARM_TENANT_ID="..."
+# Cuando se usan estas env vars, no es necesario declarar la variable
+# equivalente en este archivo.
+#
+# Nota: subscription_id NO tiene este comportamiento (no tiene default en
+# variables.tf), por lo que siempre debe recibir un valor: ya sea en este
+# archivo, con -var, o mediante la variable de entorno TF_VAR_subscription_id.
+
+# Obligatoria. Identificador (UUID) de la suscripcion de Azure donde se
+# desplegara el laboratorio. Sin default: siempre debe proveerse un valor.
+subscription_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Opcional. Client ID (UUID / Application ID) del Service Principal usado
+# para autenticar el provider azurerm. Puede omitirse por completo (o
+# dejarse fuera de este archivo) si se define la variable de entorno
+# ARM_CLIENT_ID; en ese caso el provider la toma automaticamente.
+client_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Opcional / SENSIBLE. Client Secret del Service Principal. Puede omitirse
+# por completo (o dejarse fuera de este archivo) si se define la variable de
+# entorno ARM_CLIENT_SECRET. NUNCA escriba aqui un secreto real; este valor
+# es solo un placeholder de formato.
+client_secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# Opcional. Tenant ID (UUID) de Azure AD. Puede omitirse por completo (o
+# dejarse fuera de este archivo) si se define la variable de entorno
+# ARM_TENANT_ID.
+tenant_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Obligatoria. Nombre del grupo de recursos creado por la capa "foundation"
+# (Ola 1). No tiene default: debe declararse siempre. Obtengalo de los
+# outputs de foundation ya aplicada, ejecutando desde este directorio:
+#   terraform -chdir=../01-foundation output -raw resource_group_name
+resource_group_name = "rg-llm-lab-example"
+
+# Opcional. Region de Azure de la capa foundation. Tiene un default seguro
+# ("eastus2" en variables.tf) que coincide con el default de foundation;
+# si su despliegue de foundation uso una region distinta, obtenga el valor
+# real ejecutando desde este directorio:
+#   terraform -chdir=../01-foundation output -raw location
+location = "eastus2"
+
+# Obligatoria. Identificador de la subred creada por la capa "networking"
+# (Ola 2). No tiene default: debe declararse siempre. Obtengalo ejecutando
+# desde este directorio:
+#   terraform -chdir=../02-networking output -raw subnet_id
+subnet_id = "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/rg-llm-lab-example/providers/Microsoft.Network/virtualNetworks/vm-ollama-h100-vnet/subnets/vm-ollama-h100-subnet"
+
+# Obligatoria. Identificador de la IP publica creada por la capa
+# "networking" (Ola 2). No tiene default: debe declararse siempre.
+# Obtengalo ejecutando desde este directorio:
+#   terraform -chdir=../02-networking output -raw public_ip_id
+public_ip_id = "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/rg-llm-lab-example/providers/Microsoft.Network/publicIPAddresses/vm-ollama-h100-pip"
+
+# Obligatoria. Direccion de la IP publica creada por la capa "networking"
+# (Ola 2). No tiene default: debe declararse siempre. Se reexpone como
+# output de esta capa para la fase de configuracion. Obtengala ejecutando
+# desde este directorio:
+#   terraform -chdir=../02-networking output -raw public_ip_address
+# El valor de abajo es un placeholder del rango de documentacion TEST-NET-3
+# (RFC 5737); reemplacelo por el valor real obtenido del comando anterior.
+public_ip_address = "203.0.113.10"
+
+# Opcional. Nombre de la interfaz de red (NIC) de la VM. Tiene un default
+# seguro en variables.tf, siguiendo la convencion "prefijo-funcion" del
+# proyecto; puede omitirse si el default es adecuado.
+nic_name = "vm-ollama-h100-nic"
+
+# Opcional. Nombre de la maquina virtual. Tiene un default seguro en
+# variables.tf, siguiendo la convencion "prefijo-funcion" del proyecto;
+# puede omitirse si el default es adecuado.
+vm_name = "vm-ollama-h100"
+
+# Opcional. Tamano (SKU) de la maquina virtual GPU. Tiene un default seguro
+# en variables.tf ("Standard_NC40ads_H100_v5", 1x GPU NVIDIA H100 NVL);
+# puede omitirse si el default es adecuado. Verifique la cuota disponible
+# en la region antes de cambiarlo.
+vm_size = "Standard_NC40ads_H100_v5"
+
+# Opcional. Nombre del usuario administrador de la VM. Tiene un default
+# seguro en variables.tf ("azureuser"); puede omitirse si el default es
+# adecuado.
+admin_username = "azureuser"
+
+# Obligatoria. Ruta local al archivo de llave publica SSH usado para
+# autenticar al usuario administrador (autenticacion por llave unicamente;
+# la autenticacion por contrasena queda deshabilitada). No tiene default:
+# debe declararse siempre, y el archivo debe existir y ser legible
+# (validation con fileexists en variables.tf). Ejemplo coherente con la
+# guia del proyecto (guia-vm-ollama-nc40ads-h100.md), que genera la llave
+# en formato PEM con "ssh-keygen -m PEM" en "$HOME/.ssh/ollama_h100.pem":
+ssh_public_key_path = "~/.ssh/ollama_h100.pem.pub"
+
+# Opcional. Publisher de la imagen del sistema operativo. Tiene un default
+# seguro en variables.tf ("microsoft-dsvm"); puede omitirse si el default
+# es adecuado.
+image_publisher = "microsoft-dsvm"
+
+# Opcional. Offer de la imagen del sistema operativo. Tiene un default
+# seguro en variables.tf ("ubuntu-hpc", imagen HPC con drivers NVIDIA
+# preinstalados); puede omitirse si el default es adecuado.
+image_offer = "ubuntu-hpc"
+
+# Opcional. SKU de la imagen del sistema operativo. Tiene un default
+# seguro en variables.tf ("2404"); puede omitirse si el default es
+# adecuado. Tambien se usa como "plan" del agreement de Marketplace cuando
+# accept_marketplace_terms = true e image_plan_name no se define (ver nota
+# mas abajo).
+image_sku = "2404"
+
+# Opcional. Version de la imagen del sistema operativo. Tiene un default
+# seguro en variables.tf ("latest"); puede omitirse si el default es
+# adecuado.
+image_version = "latest"
+
+# Opcional. Tamano en GB del disco del sistema operativo. Tiene un default
+# seguro en variables.tf (64); puede omitirse si el default es adecuado.
+os_disk_size_gb = 64
+
+# Opcional. Tipo de cuenta de almacenamiento del disco del sistema
+# operativo. Tiene un default seguro en variables.tf ("StandardSSD_LRS");
+# puede omitirse si el default es adecuado.
+os_disk_storage_account_type = "StandardSSD_LRS"
+
+# Opcional. Si es true, acepta los terminos de la imagen Marketplace antes
+# de crear la VM. Tiene un default seguro en variables.tf (false), que es
+# el valor correcto para la imagen HPC por defecto ("ubuntu-hpc"), ya que
+# esta no requiere aceptacion de terminos de Marketplace. Active este valor
+# (true) unicamente si cambia a una imagen de pago que si exija un
+# agreement de Marketplace; en ese caso revise tambien image_plan_name.
+accept_marketplace_terms = false
+
+# Opcional. Nombre del plan de Marketplace para la imagen, si difiere del
+# SKU. Tiene un default seguro en variables.tf (null: se usa image_sku como
+# nombre del plan). Solo se utiliza cuando accept_marketplace_terms = true;
+# para muchas imagenes el plan coincide con el SKU, pero en imagenes de
+# pago puede diferir, por lo que este valor permite ajustarlo sin editar
+# codigo.
+image_plan_name = null
+
+# Opcional. Etiquetas a aplicar a los recursos de computo (NIC y VM). Tiene
+# un default seguro ({} en variables.tf); puede omitirse si no se
+# requieren etiquetas.
+tags = {
+  environment = "lab"
+  project     = "llm-ollama-h100"
+  owner       = "xxxxxxxx"
+}
